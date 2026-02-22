@@ -1,24 +1,31 @@
-##########################
-# SOURCE BUCKET (source region)
-##########################
-resource "aws_s3_bucket" "source" {
-  provider            = aws.source
-  bucket              = var.source_bucket
+# Source bucket
+resource "aws_s3_bucket" "sclr_source" {
+  bucket              = var.source_bucket_name
   object_lock_enabled = true
 }
 
-resource "aws_s3_bucket_versioning" "source" {
-  provider = aws.source
-  bucket   = aws_s3_bucket.source.id
+resource "aws_s3_bucket_versioning" "sclr_source_versioning" {
+  bucket = aws_s3_bucket.sclr_source.id
 
   versioning_configuration {
     status = "Enabled"
   }
 }
 
-resource "aws_s3_bucket_object_lock_configuration" "source" {
-  provider = aws.source
-  bucket   = aws_s3_bucket.source.id
+#Source Encryption
+resource "aws_s3_bucket_server_side_encryption_configuration" "sclr_source_encryption" {
+  bucket = aws_s3_bucket.sclr_source.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      kms_master_key_id = aws_kms_key.sclr_source_kms.arn
+      sse_algorithm     = "aws:kms"
+    }
+  }
+}
+#Object lock
+resource "aws_s3_bucket_object_lock_configuration" "sclr_object_lock" {
+  bucket = aws_s3_bucket.sclr_source.id
 
   rule {
     default_retention {
@@ -27,134 +34,59 @@ resource "aws_s3_bucket_object_lock_configuration" "source" {
     }
   }
 }
-
-resource "aws_s3_bucket_server_side_encryption_configuration" "source" {
-  provider = aws.source
-  bucket   = aws_s3_bucket.source.id
-
-  rule {
-    apply_server_side_encryption_by_default {
-      kms_master_key_id = var.source_kms_arn
-      sse_algorithm     = "aws:kms"
-    }
-  }
-}
-
-resource "aws_s3_bucket_lifecycle_configuration" "source" {
-  provider = aws.source
-  bucket   = aws_s3_bucket.source.id
+#Source Lifecycle
+resource "aws_s3_bucket_lifecycle_configuration" "sclr_lifecycle" {
+  bucket = aws_s3_bucket.sclr_source.id
 
   rule {
-    id     = "source-lifecycle"
+    id     = "sclr-lifecycle-rule"
     status = "Enabled"
-    filter {}
 
     transition {
       days          = 30
       storage_class = "STANDARD_IA"
     }
-
     transition {
       days          = 90
       storage_class = "GLACIER"
     }
+    transition {
+      days          = 180
+      storage_class = "DEEP_ARCHIVE"
+    }
 
-    expiration {
-      days = 365
+    noncurrent_version_transition {
+      noncurrent_days = 30
+      storage_class   = "GLACIER"
     }
   }
 }
 
-##########################
-# DESTINATION BUCKET (destination region)
-##########################
-resource "aws_s3_bucket" "destination" {
-  provider            = aws.destination
-  bucket              = var.destination_bucket
+# Destination bucket (DR region)
+resource "aws_s3_bucket" "sclr_destination" {
+  provider            = aws.dr
+  bucket              = var.destination_bucket_name
   object_lock_enabled = true
 }
 
-resource "aws_s3_bucket_versioning" "destination" {
-  provider = aws.destination
-  bucket   = aws_s3_bucket.destination.id
+#destination versioning
+resource "aws_s3_bucket_versioning" "sclr_destination_versioning" {
+  provider = aws.dr
+  bucket   = aws_s3_bucket.sclr_destination.id
 
   versioning_configuration {
     status = "Enabled"
   }
 }
-
-resource "aws_s3_bucket_object_lock_configuration" "destination" {
-  provider = aws.destination
-  bucket   = aws_s3_bucket.destination.id
-
-  rule {
-    default_retention {
-      mode = "GOVERNANCE"
-      days = 7
-    }
-  }
-}
-
-resource "aws_s3_bucket_server_side_encryption_configuration" "destination" {
-  provider = aws.destination
-  bucket   = aws_s3_bucket.destination.id
+#destination encryption
+resource "aws_s3_bucket_server_side_encryption_configuration" "sclr_destination_encryption" {
+  provider = aws.dr
+  bucket   = aws_s3_bucket.sclr_destination.id
 
   rule {
     apply_server_side_encryption_by_default {
-      kms_master_key_id = var.destination_kms_arn
+      kms_master_key_id = aws_kms_key.sclr_destination_kms.arn
       sse_algorithm     = "aws:kms"
     }
-  }
-}
-
-##########################
-# REPLICATION CONFIGURATION (source region)
-##########################
-resource "aws_s3_bucket_replication_configuration" "replication" {
-  provider = aws.source
-  bucket   = aws_s3_bucket.source.id
-  role     = var.replication_role_arn
-
-  depends_on = [
-    aws_s3_bucket_versioning.source,
-    aws_s3_bucket_versioning.destination
-  ]
-
-  rule {
-    id     = "replication-rule"
-    status = "Enabled"
-    filter {}
-
-    destination {
-      bucket        = aws_s3_bucket.destination.arn
-      storage_class = "STANDARD"
-
-      encryption_configuration {
-        replica_kms_key_id = var.destination_kms_arn
-      }
-    }
-
-    source_selection_criteria {
-      sse_kms_encrypted_objects { status = "Enabled" }
-    }
-
-    delete_marker_replication {
-      status = "Enabled"
-    }
-  }
-}
-
-##########################
-# REPLICATION FAILURE NOTIFICATION
-##########################
-resource "aws_s3_bucket_notification" "replication_failure" {
-  provider = aws.source
-  bucket   = aws_s3_bucket.source.id
-
-  depends_on = [aws_s3_bucket_replication_configuration.replication]
-
-  topic {
-    topic_arn = var.sns_topic_arn
-    events    = ["s3:Replication:OperationFailedReplication"]
   }
 }
