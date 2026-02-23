@@ -7,7 +7,7 @@ resource "aws_s3_bucket_policy" "sclr_source_policy" {
        {
         Effect = "Allow"
         Principal = {
-          AWS = aws_iam_role.replication_role_kms.arn
+          AWS = aws_iam_role.replication_role.arn
         }
         Action = [
           "s3:ListBucket",
