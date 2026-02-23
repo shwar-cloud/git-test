@@ -4,31 +4,42 @@ resource "aws_s3_bucket_policy" "sclr_source_policy" {
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
-      {
-        Effect = "Deny"
-        Principal = "*"
-        Action = "s3:PutObject"
-        Resource = "${aws_s3_bucket.sclr_source.arn}/*"
-        Condition = { Bool = { "aws:SecureTransport" = "false" } }
-      },
-      {
+       {
         Effect = "Allow"
-        Principal = { AWS = aws_iam_role.sclr_replication_role.arn }
+        Principal = {
+          AWS = aws_iam_role.replication_role_kms.arn
+        }
         Action = [
-          "s3:GetObjectVersion",
-          "s3:GetObjectVersionAcl",
+          "s3:ListBucket",
+          "s3:GetReplicationConfiguration",
           "s3:GetObjectVersionForReplication",
-          "s3:ListBucket"
+          "s3:GetObjectVersionAcl",
+          "s3:GetObjectVersionTagging",
+          "s3:GetObjectRetention",
+          "s3:GetObjectLegalHold"
         ]
         Resource = [
           aws_s3_bucket.sclr_source.arn,
           "${aws_s3_bucket.sclr_source.arn}/*"
         ]
+      },
+    # Force SSE-KMS encryption
+      {
+        Sid = "DenyUnEncryptedUploads"
+        Effect = "Deny"
+        Principal = "*"
+        Action = "s3:PutObject"
+        Resource = "${aws_s3_bucket.sclr_source.arn}/*"
+        Condition = {
+          StringNotEquals = {
+            "s3:x-amz-server-side-encryption" = "aws:kms"
+          }
+        }
       }
     ]
   })
 }
-
+ #Destination
 resource "aws_s3_bucket_policy" "sclr_destination_policy" {
   provider = aws.dr
   bucket   = aws_s3_bucket.sclr_destination.id
@@ -39,27 +50,18 @@ resource "aws_s3_bucket_policy" "sclr_destination_policy" {
       # Allow replication role to write objects
       {
         Effect = "Allow"
-        Principal = { AWS = aws_iam_role.sclr_replication_role.arn }
-        Action = [
+        Principal = { 
+        AWS = aws_iam_role.sclr_replication_role.arn 
+         }
+       Action = [
           "s3:ReplicateObject",
           "s3:ReplicateDelete",
-          "s3:ReplicateTags"
+          "s3:ReplicateTags",
+          "s3:GetObjectVersionTagging",
+          "s3:ObjectOwnerOverrideToBucketOwner"
         ]
-        Resource = [
-          aws_s3_bucket.sclr_destination.arn,
-          "${aws_s3_bucket.sclr_destination.arn}/*"
-        ]
-      },
-      
-      {
-        Effect = "Allow"
-        Principal = { AWS = aws_iam_role.sclr_replication_role.arn }
-        Action = "s3:BypassGovernanceRetention"
-        Resource = [
-          aws_s3_bucket.sclr_destination.arn,
-          "${aws_s3_bucket.sclr_destination.arn}/*"
-        ]
-      }
+        Resource = "${aws_s3_bucket.sclr_destination.arn}/*"
+       }
     ]
   })
 }
