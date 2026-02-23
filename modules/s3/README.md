@@ -20,11 +20,4 @@ aws sns list-topics --region us-east-1
 List all subscriptions for a specific SNS topic
 aws sns list-subscriptions-by-topic --topic-arn arn:aws:sns:us-east-1:348375261644:sclr-replication-alerts --region us-east-1
 
-Upload without KMS
-aws s3 cp sourcefile2.txt s3://source-sclrbucket1/ upload failed: .\sourcefile2.txt to s3://source-sclrbucket1/sourcefile2.txt An error occurred (AccessDenied) when calling the PutObject operation: User: arn:aws:iam::348375261644:user/terraform is not authorized to perform: s3:PutObject on resource: "arn:aws:s3:::source-sclrbucket1/sourcefile2.txt" with an explicit deny in a resource-based policy
-
-Upload with KMS
-aws s3 cp sourcefile2.txt s3://source-sclrbucket1/ --sse aws:kms --sse-kms-key-id 2cc6fc85-4f8a-40e6-955d-afee4030f903 upload: .\sourcefile2.txt to s3://source-sclrbucket1/sourcefile2.txt
-
 To check the status and configuration of the CloudWatch alarm.
-aws cloudwatch describe-alarms --alarm-names "sclr-replication-lag"
