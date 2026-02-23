@@ -114,3 +114,16 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "sclr_source_encry
     }
   }
 }
+
+#destination encryption
+resource "aws_s3_bucket_server_side_encryption_configuration" "sclr_destination_encryption" {
+  provider = aws.dr
+  bucket   = aws_s3_bucket.sclr_destination.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      kms_master_key_id = aws_kms_key.sclr_destination_kms.arn
+      sse_algorithm     = "aws:kms"
+    }
+  }
+}
