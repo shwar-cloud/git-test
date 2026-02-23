@@ -1,5 +1,5 @@
 resource "aws_iam_role" "sclr_replication_role" {
-  name = "sclr-replication-role"
+  name = "sclr_replication_role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
