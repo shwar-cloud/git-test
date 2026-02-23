@@ -1,21 +1,23 @@
+#replication takes longer than expected
 resource "aws_cloudwatch_metric_alarm" "replication_lag" {
   alarm_name          = "sclr-replication-lag-alarm"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = 1
   metric_name         = "ReplicationLatency"
   namespace           = "AWS/S3"
-  period              = 300
+  period              = 60
   statistic           = "Maximum"
-  threshold           = 900
-  alarm_description   = "Alarm when S3 replication latency exceeds 15 minutes"
+  threshold           = 60
+  alarm_description   = "Alarm when S3 replication latency exceeds 1 minutes"
 
   dimensions = {
     BucketName = aws_s3_bucket.sclr_source.bucket  
-    RuleId     = "sclr-replication-rule"
+    alarm_description = Alarm when S3 replication latency exceeds 15 minutes
   }
 
   alarm_actions = [
-    aws_sns_topic.sclr_replication_alerts.arn     
+    aws_sns_topic.sclr_replication_alerts.arn    '
+    #RuleId     = "sclr-replication-rule"
   ]
 }
 
