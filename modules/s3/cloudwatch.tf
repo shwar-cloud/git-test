@@ -20,7 +20,7 @@ resource "aws_cloudwatch_metric_alarm" "replication_lag" {
     #RuleId     = "sclr-replication-rule"
   ]
 }
-
+#  alarm triggers immediately for single object fails to replicate.
 resource "aws_cloudwatch_metric_alarm" "replication_failures" {
   alarm_name          = "sclr-replication-failed-operations"
   comparison_operator = "GreaterThanThreshold"
