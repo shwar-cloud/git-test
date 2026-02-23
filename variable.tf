@@ -1,12 +1,15 @@
-variable "source_bucket_name" {
-  type        = string
-  description = "Name of the source S3 bucket"
-  default     = "sclrsourcebucket"
+variable "source_region" {
+  type = string
 }
 
-variable "destination_bucket_name" {
-  type        = string
-  description = "Name of the destination S3 bucket"
-  default     = "sclrdestinationbucket"
+variable "destination_region" {
+  type = string
 }
 
+variable "bucket_name_source" {
+  type = string
+}
+
+variable "bucket_name_destination" {
+  type = string
+}
