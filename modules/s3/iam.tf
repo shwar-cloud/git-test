@@ -83,7 +83,7 @@ resource "aws_iam_role_policy" "sclr_replication_policy" {
         Action = [
           "kms:Encrypt"
         ]
-        Resource = aws_kms_key.destination_key.arn
+        Resource = aws_kms_key.sclr_destination.arn
         Condition = {
           StringLike = {
             "kms:ViaService" = "s3.${var.destination_region}.amazonaws.com"
