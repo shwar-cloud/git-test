@@ -51,7 +51,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "sclr_lifecycle" {
   }
 }
 
-# Destination bucket (DR region)
+# Destination bucket 
 resource "aws_s3_bucket" "sclr_destination" {
   provider            = aws.dr
   bucket              = var.destination_bucket_name
