@@ -16,12 +16,12 @@ resource "aws_kms_key" "sclr_source_kms" {
         Resource = "*"
       },
 
-      # Allow replication role to decrypt with conditions
+      # Allow replication role to decrypt source with conditions
       {
         Sid    = "AllowReplicationRoleDecrypt"
         Effect = "Allow"
         Principal = {
-          AWS = aws_iam_role.replication_role_kms.arn
+          AWS = aws_iam_role.sclr_replication_role.arn
         }
         Action = [
           "kms:Decrypt"
@@ -37,8 +37,7 @@ resource "aws_kms_key" "sclr_source_kms" {
   })
 }
 
-
-#destination 
+#destination kms key
 resource "aws_kms_key" "sclr_destination_kms" {
   provider            = aws.dr
   description         = "SCLR Destination KMS Key"
@@ -48,33 +47,6 @@ resource "aws_kms_key" "sclr_destination_kms" {
     Version = "2012-10-17",
     Statement = [
       {
-        Sid    = "Allow replication role usage"
-        Effect = "Allow"
-        Principal = {
-          AWS = aws_iam_role.sclr_replication_role.arn
-        }
-        Action = [
-          "kms:Encrypt",
-          "kms:GenerateDataKey",
-          "kms:DescribeKey",
-          "kms:ReEncryptTo"
-        ]
-        Resource = "*"
-      },
-      {
-        Sid    = "Allow account admins"
-        Effect = "Allow"
-        Principal = {
-          AWS = "arn:aws:iam::348375261644:root"
-        }
-        Action = "kms:*"
-        Resource = "*"
-      }
-    ]
-  })
-  depends_on = [aws_iam_role.sclr_replication_role]
-}
-{
         Sid    = "RootAccess"
         Effect = "Allow"
         Principal = {
@@ -89,7 +61,7 @@ resource "aws_kms_key" "sclr_destination_kms" {
         Sid    = "AllowReplicationRoleEncrypt"
         Effect = "Allow"
         Principal = {
-          AWS = aws_iam_role.replication_role_kms.arn
+          AWS = aws_iam_role.sclr_replication_role_kms.arn
         }
         Action = [
           "kms:Encrypt"
@@ -104,10 +76,10 @@ resource "aws_kms_key" "sclr_destination_kms" {
     ]
   })
 }
-
-resource "aws_kms_alias" "sclr_destination_kms" {
-  name          = "alias/my-key-alias"
-  target_key_id = aws_kms_key.sclr_destination_kms.key_id
+resource "aws_kms_alias" "destination_alias" {
+  provider      = aws.dr
+  name          = "alias/s3-destination-key"
+  target_key_id = aws_kms_key.destination_key.key_id
 }
 
 #Source Encryption
