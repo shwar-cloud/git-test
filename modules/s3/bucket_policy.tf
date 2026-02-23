@@ -18,12 +18,9 @@ resource "aws_s3_bucket_policy" "sclr_source_policy" {
           "s3:GetObjectRetention",
           "s3:GetObjectLegalHold"
         ]
-        Resource = [
-          aws_s3_bucket.sclr_source.arn,
-          "${aws_s3_bucket.sclr_source.arn}/*"
-        ]
+        Resource = "${aws_s3_bucket.sclr_source.arn}/*"
       },
-    # Force SSE-KMS encryption
+  
       {
         Sid = "DenyUnEncryptedUploads"
         Effect = "Deny"
