@@ -3,8 +3,8 @@ resource "aws_s3_bucket_policy" "sclr_source_kmspolicy" {
 
   policy = jsonencode({
     Version = "2012-10-17",
-    Statement = [
-       {
+    Statement = [      
+  {
         Effect = "Allow"
         Principal = {
           AWS = aws_iam_role.replication_role_kms.arn
@@ -20,7 +20,7 @@ resource "aws_s3_bucket_policy" "sclr_source_kmspolicy" {
         ]
         Resource = "${aws_s3_bucket.sclr_source.arn}/*"
       },
-  
+  #uploads need to be encrypted
       {
         Sid = "DenyUnEncryptedUploads"
         Effect = "Deny"
@@ -51,7 +51,7 @@ resource "aws_s3_bucket_policy" "sclr_destination_kmspolicy" {
         AWS =aws_iam_role.replication_role_kms.arn
          }
        Action = [
-          "s3:ReplicateObject",
+          "s3:ReplicateObject", 
           "s3:ReplicateDelete",
           "s3:ReplicateTags",
           "s3:GetObjectVersionTagging",
