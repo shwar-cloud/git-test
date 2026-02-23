@@ -12,18 +12,22 @@ resource "aws_iam_role" "sclr_replication_role" {
 }
 
 resource "aws_iam_role_policy" "sclr_replication_policy" {
-  role = aws_iam_role.sclr_replication_role.id
+  name = sclr_replication_policy
 
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
       {
+        Sid    = "ProvideReadAccessToSourceBucket"
         Effect = "Allow"
         Action = [
-          "s3:GetObjectVersion",
-          "s3:GetObjectVersionAcl",
+          "s3:ListBucket",
+          "s3:GetReplicationConfiguration",
           "s3:GetObjectVersionForReplication",
-          "s3:ListBucket"
+          "s3:GetObjectVersionAcl",
+          "s3:GetObjectVersionTagging",
+          "s3:GetObjectRetention",
+          "s3:GetObjectLegalHold"
         ]
         Resource = [
           aws_s3_bucket.sclr_source.arn,
@@ -42,18 +46,57 @@ resource "aws_iam_role_policy" "sclr_replication_policy" {
           "${aws_s3_bucket.sclr_destination.arn}/*"
         ]
       },
+      # Write to destination bucket
       {
+        Sid    = "AllowReplicationToDestinationBucket"
         Effect = "Allow"
         Action = [
-          "kms:Decrypt",
-          "kms:Encrypt",
-          "kms:GenerateDataKey"
+          "s3:ReplicateObject",
+          "s3:ReplicateDelete",
+          "s3:ReplicateTags",
+          "s3:GetObjectVersionTagging",
+          "s3:ObjectOwnerOverrideToBucketOwner"
+        ] 
+       Resource = "${aws_s3_bucket.sclr_destination.arn}/*"
+        Condition = {
+          StringLikeIfExists = {
+            "s3:x-amz-server-side-encryption" = ["aws:kms", "AES256"]
+          }
+        }
+      },
+       # Decrypt source objects with KMS conditions
+      {
+        Sid    = "AllowDecryptOfSourceObjects"
+        Effect = "Allow"
+        Action = [
+          "kms:Decrypt"
         ]
-        Resource = [
-          aws_kms_key.sclr_source_kms.arn,
-          aws_kms_key.sclr_destination_kms.arn
+        Resource = aws_kms_key.source_key.arn
+        Condition = {
+          StringLike = {
+            "kms:ViaService" = "s3.${var.source_region}.amazonaws.com"
+          }
+        }
+      },
+
+      # Encrypt destination objects with KMS conditions
+      {
+        Sid    = "AllowEncryptOfDestinationObjects"
+        Effect = "Allow"
+        Action = [
+          "kms:Encrypt"
         ]
+        Resource = aws_kms_key.destination_key.arn
+        Condition = {
+          StringLike = {
+            "kms:ViaService" = "s3.${var.destination_region}.amazonaws.com"
+          }
+        }
       }
     ]
   })
+}
+resource "aws_iam_role_policy_attachment" "attach" {
+  role       = aws_iam_role.replication_role_kms.name
+  policy_arn = aws_iam_policy.replication_policy_kms.arn
 }
