@@ -1,6 +1,6 @@
 resource "aws_s3_bucket_replication_configuration" "sclr_replication" {
   bucket = aws_s3_bucket.sclr_source.id
-  role   = aws_iam_role.replication_role_kms.arn
+  role   = aws_iam_role.replication_role.arn
   
 depends_on = [
     aws_s3_bucket_versioning.source,
