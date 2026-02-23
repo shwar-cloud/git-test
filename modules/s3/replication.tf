@@ -9,9 +9,11 @@ resource "aws_s3_bucket_replication_configuration" "sclr_replication" {
   ]
 
 rule {
-    #id     = "ReplicateKMSOnly"
+    id     = "ReplicateKMSOnly"
     status = "Enabled"
-    filter {}
+    filter {
+       prefix = "" # replicate all objects
+    }
 
     # Only replicate KMS-encrypted objects
     source_selection_criteria {
