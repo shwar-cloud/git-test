@@ -1,3 +1,4 @@
+data "aws_caller_identity" "current" {}
 resource "aws_kms_key" "sclr_source_kms" {
   description         = "SCLR Source KMS Key"
   enable_key_rotation = true
@@ -104,10 +105,10 @@ resource "aws_kms_key" "sclr_destination_kms" {
   })
 }
 
-#resource "aws_kms_alias" "sclr_destination_kms" {
- # name          = "alias/my-key-alias"
-  #target_key_id = aws_kms_key.sclr_destination_kms.key_id
-#}
+resource "aws_kms_alias" "sclr_destination_kms" {
+  name          = "alias/my-key-alias"
+  target_key_id = aws_kms_key.sclr_destination_kms.key_id
+}
 
 #Source Encryption
 resource "aws_s3_bucket_server_side_encryption_configuration" "sclr_source_encryption" {
