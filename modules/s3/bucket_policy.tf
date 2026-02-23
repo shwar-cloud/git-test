@@ -7,7 +7,7 @@ resource "aws_s3_bucket_policy" "sclr_source_kmspolicy" {
   {
         Effect = "Allow"
         Principal = {
-          AWS = aws_iam_role.replication_role_kms.arn
+          AWS = aws_iam_role.sclr_replication_role_kms.arn
         }
         Action = [
           "s3:ListBucket",
@@ -48,7 +48,7 @@ resource "aws_s3_bucket_policy" "sclr_destination_kmspolicy" {
       {
         Effect = "Allow"
         Principal = { 
-        AWS =aws_iam_role.replication_role_kms.arn
+        AWS =aws_iam_role.sclr_replication_role_kms.arn
          }
        Action = [
           "s3:ReplicateObject", 
