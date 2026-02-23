@@ -1,4 +1,4 @@
-resource "aws_s3_bucket_policy" "sclr_source_policy" {
+resource "aws_s3_bucket_policy" "sclr_source_kmspolicy" {
   bucket = aws_s3_bucket.sclr_source.id
 
   policy = jsonencode({
@@ -7,7 +7,7 @@ resource "aws_s3_bucket_policy" "sclr_source_policy" {
        {
         Effect = "Allow"
         Principal = {
-          AWS = aws_iam_role.replication_role.arn
+          AWS = aws_iam_role.replication_role_kms.arn
         }
         Action = [
           "s3:ListBucket",
@@ -37,7 +37,7 @@ resource "aws_s3_bucket_policy" "sclr_source_policy" {
   })
 }
  #Destination
-resource "aws_s3_bucket_policy" "sclr_destination_policy" {
+resource "aws_s3_bucket_policy" "sclr_destination_kmspolicy" {
   provider = aws.dr
   bucket   = aws_s3_bucket.sclr_destination.id
 
@@ -48,7 +48,7 @@ resource "aws_s3_bucket_policy" "sclr_destination_policy" {
       {
         Effect = "Allow"
         Principal = { 
-        AWS = aws_iam_role.sclr_replication_role.arn 
+        AWS =aws_iam_role.replication_role_kms.arn
          }
        Action = [
           "s3:ReplicateObject",
