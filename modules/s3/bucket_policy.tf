@@ -50,7 +50,7 @@ resource "aws_s3_bucket_policy" "sclr_destination_policy" {
           "${aws_s3_bucket.sclr_destination.arn}/*"
         ]
       },
-      # 👇 Add this statement for object lock bypass
+      
       {
         Effect = "Allow"
         Principal = { AWS = aws_iam_role.sclr_replication_role.arn }
