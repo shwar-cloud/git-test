@@ -95,6 +95,6 @@ resource "aws_iam_role_policy" "sclr_replication_policy" {
 }
 
 resource "aws_iam_role_policy_attachment" "replication_attachment" {
-  role       = aws_iam_role.replication_role_kms.name
-  policy_arn = aws_iam_policy.replication_policy_kms.arn
+  role       = aws_iam_role.replication_role.name
+  policy_arn = aws_iam_policy.replication_policy.arn
 }
