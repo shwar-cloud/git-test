@@ -12,17 +12,6 @@ resource "aws_s3_bucket_versioning" "sclr_source_versioning" {
   }
 }
 
-#Source Encryption
-resource "aws_s3_bucket_server_side_encryption_configuration" "sclr_source_encryption" {
-  bucket = aws_s3_bucket.sclr_source.id
-
-  rule {
-    apply_server_side_encryption_by_default {
-      kms_master_key_id = aws_kms_key.sclr_source_kms.arn
-      sse_algorithm     = "aws:kms"
-    }
-  }
-}
 #Object lock
 resource "aws_s3_bucket_object_lock_configuration" "sclr_object_lock" {
   bucket = aws_s3_bucket.sclr_source.id
