@@ -22,17 +22,14 @@ resource "aws_iam_role_policy" "sclr_replication_policy" {
         Effect = "Allow"
         Action = [
           "s3:ListBucket",
-          "s3:GetReplicationConfiguration",
+          "s3:GetObjectVersion",
           "s3:GetObjectVersionForReplication",
           "s3:GetObjectVersionAcl",
           "s3:GetObjectVersionTagging",
           "s3:GetObjectRetention",
           "s3:GetObjectLegalHold"
         ]
-        Resource = [
-          aws_s3_bucket.sclr_source.arn,
-          "${aws_s3_bucket.sclr_source.arn}/*"
-        ]
+        Resource = "${aws_s3_bucket.sclr_source.arn}/*"
       },
       {
         Effect = "Allow"
