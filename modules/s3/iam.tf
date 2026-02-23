@@ -14,7 +14,7 @@ resource "aws_iam_role" "sclr_replication_role" {
 }
 # Replication Policy
 resource "aws_iam_role_policy" "sclr_replication_policy" {
-  name = sclr_replication_policy
+  name ="sclr_replication_policy"
 
   policy = jsonencode({
     Version = "2012-10-17",
@@ -95,6 +95,6 @@ resource "aws_iam_role_policy" "sclr_replication_policy" {
 }
 
 resource "aws_iam_role_policy_attachment" "replication_attachment" {
-  role       = aws_iam_role.replication_role.name
+  role       = aws_iam_role.sclr_replication_role.name
   policy_arn = aws_iam_policy.replication_policy.arn
 }
