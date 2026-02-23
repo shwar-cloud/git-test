@@ -5,7 +5,9 @@ resource "aws_iam_role" "sclr_replication_role" {
     Version = "2012-10-17",
     Statement = [{
       Effect    = "Allow",
-      Principal = { Service = "s3.amazonaws.com" },
+      Principal = { 
+       Service = "s3.amazonaws.com" 
+    },
       Action    = "sts:AssumeRole"
     }]
   })
@@ -38,10 +40,8 @@ resource "aws_iam_role_policy" "sclr_replication_policy" {
           "s3:ReplicateDelete",
           "s3:ReplicateTags"
         ]
-        Resource = [
-          aws_s3_bucket.sclr_destination.arn,
-          "${aws_s3_bucket.sclr_destination.arn}/*"
-        ]
+        Resource = "${aws_s3_bucket.sclr_destination.arn}/*"
+        
       },
       # Write to destination bucket
       {
@@ -93,7 +93,8 @@ resource "aws_iam_role_policy" "sclr_replication_policy" {
     ]
   })
 }
-resource "aws_iam_role_policy_attachment" "attach" {
-  role       = aws_iam_role.replication_role_kms.name
-  policy_arn = aws_iam_policy.replication_policy_kms.arn
+
+resource "aws_iam_role_policy_attachment" "replication_attachment" {
+  role       = aws_iam_role.replication_role.name
+  policy_arn = aws_iam_policy.replication_policy.arn
 }
