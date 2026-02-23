@@ -12,7 +12,7 @@ resource "aws_iam_role" "sclr_replication_role" {
     }]
   })
 }
-
+# Replication Policy
 resource "aws_iam_role_policy" "sclr_replication_policy" {
   name = sclr_replication_policy
 
