@@ -6,31 +6,38 @@ resource "aws_kms_key" "sclr_source_kms" {
     Version = "2012-10-17",
     Statement = [
       {
-        Sid    = "Allow replication role usage"
+        Sid    = "RootAccess"
         Effect = "Allow"
         Principal = {
-          AWS = aws_iam_role.sclr_replication_role.arn
+          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
         }
-        Action = [
-          "kms:Decrypt",
-          "kms:DescribeKey",
-          "kms:ReEncryptFrom"
-        ]
+        Action   = "kms:*"
         Resource = "*"
       },
+
+      # Allow replication role to decrypt with conditions
       {
-        Sid    = "Allow account admins to manage KMS"
+        Sid    = "AllowReplicationRoleDecrypt"
         Effect = "Allow"
         Principal = {
-          AWS = "arn:aws:iam::348375261644:root"
+          AWS = aws_iam_role.replication_role_kms.arn
         }
-        Action = "kms:*"
+        Action = [
+          "kms:Decrypt"
+        ]
         Resource = "*"
+        Condition = {
+          StringLike = {
+            "kms:ViaService" = "s3.${var.source_region}.amazonaws.com"
+          }
+        }
       }
     ]
   })
 }
 
+
+#destination 
 resource "aws_kms_key" "sclr_destination_kms" {
   provider            = aws.dr
   description         = "SCLR Destination KMS Key"
@@ -66,3 +73,34 @@ resource "aws_kms_key" "sclr_destination_kms" {
   })
   depends_on = [aws_iam_role.sclr_replication_role]
 }
+{
+        Sid    = "RootAccess"
+        Effect = "Allow"
+        Principal = {
+          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
+        }
+        Action   = "kms:*"
+        Resource = "*"
+      },
+
+      # Allow replication role to encrypt with conditions
+      {
+        Sid    = "AllowReplicationRoleEncrypt"
+        Effect = "Allow"
+        Principal = {
+          AWS = aws_iam_role.replication_role_kms.arn
+        }
+        Action = [
+          "kms:Encrypt"
+        ]
+        Resource = "*"
+        Condition = {
+          StringLike = {
+            "kms:ViaService" = "s3.${var.destination_region}.amazonaws.com"
+          }
+        }
+      }
+    ]
+  })
+}
+
