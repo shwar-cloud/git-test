@@ -1,12 +1,19 @@
 variable "source_bucket_name" {
-  type        = string
   description = "Name of the source S3 bucket"
-  default     = "sclrsourcebucket"
+  type        = string
 }
 
 variable "destination_bucket_name" {
-  type        = string
   description = "Name of the destination S3 bucket"
-  default     = "sclrdestinationbucket"
+  type        = string
 }
 
+variable "source_region" {
+  description = "AWS region for the source S3 bucket and KMS key"
+  type        = string
+}
+
+variable "destination_region" {
+  description = "AWS region for the destination S3 bucket and KMS key"
+  type        = string
+}
