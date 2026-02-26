@@ -13,7 +13,11 @@ resource "aws_s3_bucket_versioning" "sclr_source_versioning" {
   }
 }
 
+<<<<<<< HEAD
 # Object lock for source bucket
+=======
+#Object lock
+>>>>>>> 7a2216ea509432eef42f2c9204d95f6393d90765
 resource "aws_s3_bucket_object_lock_configuration" "sclr_object_lock" {
   bucket = aws_s3_bucket.sclr_source.id
 
@@ -55,7 +59,11 @@ resource "aws_s3_bucket_lifecycle_configuration" "sclr_lifecycle" {
   }
 }
 
+<<<<<<< HEAD
 # Destination bucket
+=======
+# Destination bucket 
+>>>>>>> 7a2216ea509432eef42f2c9204d95f6393d90765
 resource "aws_s3_bucket" "sclr_destination" {
   provider            = aws.dr
   bucket              = var.destination_bucket_name
@@ -70,4 +78,8 @@ resource "aws_s3_bucket_versioning" "sclr_destination_versioning" {
   versioning_configuration {
     status = "Enabled"
   }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7a2216ea509432eef42f2c9204d95f6393d90765

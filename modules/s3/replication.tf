@@ -1,7 +1,15 @@
 resource "aws_s3_bucket_replication_configuration" "sclr_replication" {
   bucket = aws_s3_bucket.sclr_source.id
-  role   = aws_iam_role.sclr_replication_role.arn
+  role   = aws_iam_role.replication_role.arn
+  
+depends_on = [
+    aws_s3_bucket_versioning.source,
+    aws_s3_bucket_versioning.destination,
+    aws_s3_bucket_server_side_encryption_configuration.source_encryption,
+    aws_s3_bucket_server_side_encryption_configuration.destination_encryption
+  ]
 
+<<<<<<< HEAD
   depends_on = [
     aws_s3_bucket_versioning.sclr_source_versioning,
     aws_s3_bucket_versioning.sclr_destination_versioning,
@@ -21,15 +29,30 @@ resource "aws_s3_bucket_replication_configuration" "sclr_replication" {
       sse_kms_encrypted_objects {
         status = "Enabled"
       }
+=======
+rule {
+    id     = "ReplicateKMSOnly"
+    status = "Enabled"
+    filter {
+       prefix = "" 
+>>>>>>> 7a2216ea509432eef42f2c9204d95f6393d90765
     }
 
-    destination {
+    # Only replicate KMS-encrypted objects
+    source_selection_criteria {
+      sse_kms_encrypted_objects {
+        status = "Enabled"
+      }
+    }
+
+  destination {
       bucket        = aws_s3_bucket.sclr_destination.arn
       storage_class = "STANDARD"
 
       encryption_configuration {
-        replica_kms_key_id = aws_kms_key.sclr_destination_kms.arn
+        replica_kms_key_id = aws_kms_key.sclr_destination.arn
       }
+<<<<<<< HEAD
 
       # Enable replication metrics for CloudWatch
       metrics {
@@ -43,3 +66,10 @@ resource "aws_s3_bucket_replication_configuration" "sclr_replication" {
     }
   }
 }
+=======
+    } 
+  }
+} 
+
+ 
+>>>>>>> 7a2216ea509432eef42f2c9204d95f6393d90765
