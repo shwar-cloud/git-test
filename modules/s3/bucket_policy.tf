@@ -5,27 +5,15 @@ resource "aws_s3_bucket_policy" "sclr_source_kmspolicy" {
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
-      {
-        Effect = "Allow"
-        Principal = { AWS = aws_iam_role.sclr_replication_role.arn }
-        Action = [
-          "s3:ListBucket",
-          "s3:GetReplicationConfiguration",
-          "s3:GetObjectVersionForReplication",
-          "s3:GetObjectVersionAcl",
-          "s3:GetObjectVersionTagging",
-          "s3:GetObjectRetention",
-          "s3:GetObjectLegalHold"
-        ]
-        Resource = "${aws_s3_bucket.sclr_source.arn}/*"
-      },
-      # uploads need to be encrypted
+      # Bucket-level actions
       {
         Effect    = "Allow"
         Principal = { AWS = aws_iam_role.sclr_replication_role.arn }
         Action    = ["s3:ListBucket","s3:GetReplicationConfiguration"]
         Resource  = aws_s3_bucket.sclr_source.arn
       },
+
+      # Object-level actions
       {
         Effect    = "Allow"
         Principal = { AWS = aws_iam_role.sclr_replication_role.arn }
@@ -38,6 +26,8 @@ resource "aws_s3_bucket_policy" "sclr_source_kmspolicy" {
         ]
         Resource = "${aws_s3_bucket.sclr_source.arn}/*"
       },
+
+      # Deny unencrypted uploads
       {
         Sid       = "DenyUnEncryptedUploads"
         Effect    = "Deny"

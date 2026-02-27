@@ -63,12 +63,12 @@ resource "aws_iam_policy" "sclr_replication_policy" {
         }
       },
 
-      # Decrypt source objects with KMS
+      Decrypt source objects with KMS
       {
         Sid    = "AllowDecryptOfSourceObjects"
         Effect = "Allow"
         Action = ["kms:Decrypt"]
-        Resource = aws_kms_key.source_key.arn
+        Resource = aws_kms_key.sclr_source_kms.arn
         Condition = {
           StringLike = {
             "kms:ViaService" = "s3.${var.source_region}.amazonaws.com"
@@ -85,7 +85,7 @@ resource "aws_iam_policy" "sclr_replication_policy" {
           "kms:GenerateDataKey",
           "kms:GenerateDataKeyWithoutPlaintext"
         ]
-        Resource = aws_kms_key.sclr_destination.arn
+        Resource = aws_kms_key.sclr_destination_kms.arn
         Condition = {
           StringLike = {
             "kms:ViaService" = "s3.${var.destination_region}.amazonaws.com"

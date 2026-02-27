@@ -1,12 +1,11 @@
-# Terraform working directory
-.terraform/
-
-# Terraform state files
+# Terraform files
 *.tfstate
 *.tfstate.*
+.terraform/
+terraform.tfvars
+*.tfplan
 
-# Crash logs
-crash.log
-
-# Sensitive variable files 
-*.tfvars.json
+# IDE files
+.vscode/
+.idea/
+*.swp
