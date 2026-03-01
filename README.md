@@ -18,5 +18,10 @@ Bucket policy → Blocks unencrypted uploads
 <img width="940" height="283" alt="image" src="https://github.com/user-attachments/assets/8d71b898-7d77-473d-bbe9-873a56ee08fc" />
 <img width="940" height="236" alt="image" src="https://github.com/user-attachments/assets/309b8890-d088-4035-8402-41f47a82841d" />
 <img width="940" height="245" alt="image" src="https://github.com/user-attachments/assets/075746d5-1fbc-4a3e-8c33-399dc7b8479d" />
-
+# Temporary Deny to test replication failure alarm { 
+Sid = "TemporaryDenyReplication"
+Effect = "Deny" 
+Action = "s3:ReplicateObject" 
+Resource = "${aws_s3_bucket.sclr_destination.arn}/*" }
 <img width="940" height="201" alt="image" src="https://github.com/user-attachments/assets/e00fd8eb-e9bd-4cd1-b780-705f44d01d93" />
+
