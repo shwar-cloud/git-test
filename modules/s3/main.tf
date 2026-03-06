@@ -71,3 +71,29 @@ resource "aws_s3_bucket_versioning" "sclr_destination_versioning" {
     status = "Enabled"
   }
 }
+
+# Lifecycle configuration for source bucket
+resource "aws_s3_bucket_lifecycle_configuration" "sclr_desti_lifecycle" {
+  bucket = aws_s3_bucket.sclr_destination.id      #changed 
+
+  rule {
+    id     = "sclr-lifecycle-rule"
+    status = "Enabled"
+
+    transition {
+      days          = 30  #changed 
+      storage_class = "STANDARD_IA"
+    }
+
+    transition {
+      days          = 60 #changed 
+      storage_class = "GLACIER"
+    }
+
+    transition {
+      days          = 90   #changed 
+      storage_class = "DEEP_ARCHIVE"
+    }
+
+  }
+}
